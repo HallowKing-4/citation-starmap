@@ -1,11 +1,19 @@
 # Citation Star-Map
 
-A fully static, no-backend single-page 3D citation map of network neuroscience / brain connectomics.
+Fully static, no-backend 3D citation constellation for **network neuroscience / brain connectomics**.
 
-~200 real Europe PMC papers. Edges computed at build time from reference lists (direct citation + co-citation). Never invented. Keyword co-occurrence only as a labelled fallback.
+## What is baked
+
+- ~200 real papers from EuropePMC.
+- Direct citation and co-citation edges from observed reference lists only.
+- Keyword fallback only if bibliographic graph is sparse.
+- Louvain communities, ellipsoid coordinates, 700-edge cap at build time.
+- Completeness counts; gaps shown, never imputed.
 
 ```bash
 python3 scripts/build_corpus.py
 npm install
 npm run dev
 ```
+
+Static `dist/` publishes to Kimi Websites (`*.kimi.page` / `*.ok.kimi.link`), Vercel, Netlify, or GitHub Pages.
