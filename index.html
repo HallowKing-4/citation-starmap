@@ -3,12 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Citation Star-Map — Network Neuroscience</title>
-    <meta name="description" content="A static 3D citation star-map of real OpenAlex papers in network neuroscience and brain connectomics." />
+    <title>Citation Star-Map · Network Neuroscience</title>
+    <meta name="description" content="True-3D citation star-map of real network-neuroscience and brain-connectomics papers. Edges computed at build time from Europe PMC — never invented." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://esm.sh" />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;1,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="root"></div>
     <script type="importmap">
       {
         "imports": {
@@ -16,15 +20,12 @@
           "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
           "react-dom": "https://esm.sh/react-dom@18.3.1",
           "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-          "three": "https://esm.sh/three@0.167.1",
-          "three/addons/": "https://esm.sh/three@0.167.1/examples/jsm/",
-          "react-force-graph-3d": "https://esm.sh/react-force-graph-3d@1.26.1?external=react,three"
+          "three": "https://esm.sh/three@0.170.0",
+          "three/": "https://esm.sh/three@0.170.0/",
+          "react-force-graph-3d": "https://esm.sh/react-force-graph-3d@1.26.2?external=react,three"
         }
       }
     </script>
-  </head>
-  <body>
-    <div id="root"></div>
     <script type="module" src="./app.js"></script>
   </body>
 </html>
