@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [react()],
   base: "./",
   build: {
-    target: "es2020",
+    outDir: "dist",
+    assetsDir: "assets",
     sourcemap: false,
-    chunkSizeWarningLimit: 2000,
   },
 });
