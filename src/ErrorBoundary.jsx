@@ -11,7 +11,7 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("Star-map failed", error, info);
+    console.error("Citation star-map failed", error, info);
   }
 
   render() {
@@ -19,12 +19,13 @@ export default class ErrorBoundary extends React.Component {
       return (
         <div className="fatal">
           <div className="fatal-card">
-            <div className="kicker">Star-map exception</div>
-            <h1>The constellation could not assemble.</h1>
-            <p>{String(this.state.error?.message || this.state.error)}</p>
-            <button type="button" onClick={() => location.reload()}>
-              Reload
-            </button>
+            <p className="eyebrow">Star-map failed to render</p>
+            <h1>The 3D canvas hit an error.</h1>
+            <p className="fatal-msg">{String(this.state.error.message || this.state.error)}</p>
+            <p>
+              The corpus is still available as static JSON. Use Download corpus in a
+              fresh tab if the WebGL context is unavailable.
+            </p>
           </div>
         </div>
       );
