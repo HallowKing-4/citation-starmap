@@ -1,0 +1,23 @@
+{
+  "papers": 200,
+  "with_doi": 200,
+  "with_abstract": 170,
+  "abstract_coverage": 0.85,
+  "doi_coverage": 1.0,
+  "papers_with_crossref_reference_list": 184,
+  "reference_list_coverage": 0.92,
+  "crossref_references_total": 13553,
+  "crossref_references_with_doi": 12441,
+  "doi_resolution_in_reference_lists": 0.918,
+  "direct_citation_edges_in_corpus": 377,
+  "co_citation_edges_in_corpus": 285,
+  "merged_undirected_edges": 576,
+  "displayed_edges_capped": 576,
+  "keyword_fallback_used": false,
+  "keyword_fallback_edges": 0,
+  "communities": 7,
+  "sources": ["Europe PMC REST", "Crossref REST"],
+  "edge_policy": "direct citation if both endpoints in corpus; co-citation if a corpus paper cites both; keyword co-occurrence only if citation+co-citation < 80 undirected edges; display capped to top 700 by weight×degree",
+  "no_invented_edges": true,
+  "built_at": "2026-09-05T11:22:40Z"
+}
