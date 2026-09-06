@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -11,21 +11,20 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("Citation star-map failed", error, info);
+    console.error('Star-map crashed', error, info);
   }
 
   render() {
     if (this.state.error) {
       return (
-        <div className="fatal">
-          <div className="fatal-card">
-            <p className="eyebrow">Star-map failed to render</p>
-            <h1>The 3D canvas hit an error.</h1>
-            <p className="fatal-msg">{String(this.state.error.message || this.state.error)}</p>
-            <p>
-              The corpus is still available as static JSON. Use Download corpus in a
-              fresh tab if the WebGL context is unavailable.
-            </p>
+        <div className="crash">
+          <div className="crash-card">
+            <p className="crash-kicker">error boundary</p>
+            <h1>The star-map failed to render</h1>
+            <p className="crash-msg">{String(this.state.error?.message || this.state.error)}</p>
+            <button type="button" onClick={() => window.location.reload()}>
+              Reload
+            </button>
           </div>
         </div>
       );

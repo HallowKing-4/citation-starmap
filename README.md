@@ -1,8 +1,8 @@
 # Citation Star-Map
 
-Fully static, no-backend 3D citation star-map of **200 real** network-neuroscience / connectomics papers from Europe PMC.
+Fully static, no-backend 3D citation star-map of **200 real papers** in network neuroscience / brain connectomics.
 
-Edges are baked at build time from in-corpus direct citations and co-citations. No invented links. Keyword fallback only if structural edges are sparse.
+Corpus from OpenAlex. Edges baked from `referenced_works` only (direct citation, co-citation, bibliographic coupling). Keyword co-occurrence is a documented fallback and was not used in this build.
 
 ```bash
 npm install

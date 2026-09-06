@@ -1,34 +1,33 @@
-/** Accept string | string[] | {name}[] and never throw. */
 export function getFirstAuthor(authors) {
-  if (!authors) return "Unknown";
-  if (typeof authors === "string") {
-    const first = authors.split(",")[0]?.trim();
-    return first || "Unknown";
+  if (authors == null || authors === '') return 'Unknown';
+  if (typeof authors === 'string') {
+    const piece = authors.split(/[,;&]| and /i)[0].trim();
+    return piece || 'Unknown';
   }
   if (Array.isArray(authors)) {
-    const a0 = authors[0];
-    if (!a0) return "Unknown";
-    if (typeof a0 === "string") return a0.trim() || "Unknown";
-    if (typeof a0 === "object") {
-      return (
-        a0.name ||
-        a0.fullName ||
-        [a0.lastName, a0.firstName].filter(Boolean).join(" ") ||
-        "Unknown"
-      );
-    }
+    if (authors.length === 0) return 'Unknown';
+    return getFirstAuthor(authors[0]);
   }
-  return "Unknown";
+  if (typeof authors === 'object') {
+    return (
+      authors.display_name ||
+      authors.name ||
+      authors.author ||
+      authors.first ||
+      getFirstAuthor(authors.authors) ||
+      'Unknown'
+    );
+  }
+  return 'Unknown';
 }
 
-export function formatAuthors(authors) {
-  if (!authors) return "Unknown authors";
-  if (typeof authors === "string") return authors;
-  if (Array.isArray(authors)) {
-    return authors
-      .map((a) => (typeof a === "string" ? a : a?.name || a?.fullName || ""))
-      .filter(Boolean)
-      .join(", ");
-  }
-  return "Unknown authors";
+export function formatAuthors(authors, limit = 4) {
+  if (!authors) return 'Unknown';
+  const list = Array.isArray(authors)
+    ? authors.map((a) => (typeof a === 'string' ? a : getFirstAuthor(a)))
+    : typeof authors === 'string'
+      ? authors.split(/;| and /i).map((s) => s.trim()).filter(Boolean)
+      : [getFirstAuthor(authors)];
+  if (list.length <= limit) return list.join(', ');
+  return `${list.slice(0, limit).join(', ')} +${list.length - limit}`;
 }

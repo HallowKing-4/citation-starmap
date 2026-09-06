@@ -1,8 +1,9 @@
 {
+  "framework": "vite",
   "headers": [
     {
-      "source": "/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }]
+      "source": "/graph.json",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
     }
   ]
 }
