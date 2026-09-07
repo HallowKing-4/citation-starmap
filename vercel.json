@@ -1,5 +1,9 @@
 {
-  "buildCommand": "mkdir -p dist/src && cp index.html meta.json README.md nodes-*.json links.json dist/ && cp src/*.js src/*.css dist/src/",
-  "outputDirectory": "dist",
-  "framework": null
+  "framework": "vite",
+  "headers": [
+    {
+      "source": "/data/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
+    }
+  ]
 }

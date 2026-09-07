@@ -2,8 +2,21 @@
   "name": "citation-starmap",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "build": "mkdir -p dist/src && cp index.html meta.json README.md nodes-*.json links.json dist/ && cp src/*.js src/*.css dist/src/",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "corpus": "python3 scripts/build_corpus.py"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-force-graph-3d": "^1.26.1",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
   }
 }
