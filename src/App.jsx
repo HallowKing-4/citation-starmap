@@ -15,7 +15,6 @@ export default function App() {
   const bloomRef = useRef(false);
   const nodeObjectFn = useRef(null);
   const wheelBound = useRef(false);
-
   const [raw, setRaw] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [dims, setDims] = useState(() => ({
@@ -29,15 +28,36 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    fetch("./data/graph.json")
-      .then((r) => {
-        if (!r.ok) throw new Error(`graph.json ${r.status}`);
+    const grab = (url, fallback) =>
+      fetch(url).then((r) => {
+        if (!r.ok) {
+          if (fallback !== undefined) return fallback;
+          throw new Error(`${url} ${r.status}`);
+        }
         return r.json();
-      })
-      .then((data) => {
+      });
+    Promise.all([
+      grab("./data/nodes-a.json"),
+      grab("./data/nodes-b.json"),
+      grab("./data/links.json"),
+      grab("./data/meta.json"),
+      grab("./data/abstracts-a.json", {}),
+      grab("./data/abstracts-b.json", {}),
+    ])
+      .then(([nodesA, nodesB, links, meta, absA, absB]) => {
         if (!alive) return;
-        if (Array.isArray(data.nodes)) placeOnEllipsoid(data.nodes);
-        setRaw(data);
+        const abstracts = { ...(absA || {}), ...(absB || {}) };
+        const nodes = [...(nodesA || []), ...(nodesB || [])];
+        for (const node of nodes) {
+          if (!node.abstract && abstracts[node.id]) node.abstract = abstracts[node.id];
+        }
+        placeOnEllipsoid(nodes);
+        setRaw({
+          nodes,
+          links: links || [],
+          communities: meta.communities || [],
+          completeness: meta.completeness || {},
+        });
       })
       .catch((err) => {
         if (alive) setLoadError(err);
@@ -63,29 +83,24 @@ export default function App() {
     (raw?.communities || []).forEach((c) => map.set(c.id, c.color));
     return map;
   }, [raw]);
-
   const activeComm = pinnedComm ?? hoverComm;
-
   const graphData = useMemo(() => {
     if (!raw) return { nodes: [], links: [] };
     return { nodes: raw.nodes, links: raw.links };
   }, [raw]);
 
-  const buildNodeObject = useCallback(
-    (node) => {
-      const color = colorByComm.get(node.community) || "#8aa4ff";
-      const isSel = selected && node.id === selected.id;
-      const inNeigh = highlight ? highlight.has(node.id) : true;
-      const commDim = activeComm == null ? false : node.community !== activeComm;
-      const dim = commDim || (highlight && !inNeigh);
-      const cites = node.cited_by_count || 1;
-      const base = 9 + Math.min(16, Math.log1p(cites) * 1.35);
-      const scale = isSel ? base * 1.65 : dim ? base * 0.72 : base;
-      const opacity = dim ? 0.16 : isSel ? 1 : 0.95;
-      return makeStarSprite(color, scale, opacity);
-    },
-    [activeComm, colorByComm, highlight, selected]
-  );
+  const buildNodeObject = useCallback((node) => {
+    const color = colorByComm.get(node.community) || "#8aa4ff";
+    const isSel = selected && node.id === selected.id;
+    const inNeigh = highlight ? highlight.has(node.id) : true;
+    const commDim = activeComm == null ? false : node.community !== activeComm;
+    const dim = commDim || (highlight && !inNeigh);
+    const cites = node.cited_by_count || 1;
+    const base = 9 + Math.min(16, Math.log1p(cites) * 1.35);
+    const scale = isSel ? base * 1.65 : dim ? base * 0.72 : base;
+    const opacity = dim ? 0.16 : isSel ? 1 : 0.95;
+    return makeStarSprite(color, scale, opacity);
+  }, [activeComm, colorByComm, highlight, selected]);
 
   nodeObjectFn.current = buildNodeObject;
 
@@ -143,11 +158,7 @@ export default function App() {
       const dist = 90;
       const cam = fg.camera();
       const view = cam.position.clone().sub(new THREE.Vector3(node.x, node.y, node.z)).setLength(dist);
-      fg.cameraPosition(
-        { x: node.x + view.x, y: node.y + view.y, z: node.z + view.z },
-        { x: node.x, y: node.y, z: node.z },
-        900
-      );
+      fg.cameraPosition({ x: node.x + view.x, y: node.y + view.y, z: node.z + view.z }, { x: node.x, y: node.y, z: node.z }, 900);
     }
   }, [raw]);
 
@@ -162,14 +173,12 @@ export default function App() {
     const t = typeof link.target === "object" ? link.target.id : link.target;
     return highlight.has(s) && highlight.has(t) ? GOLD_HOT : "rgba(212,175,55,0.03)";
   }, [highlight]);
-
   const linkWidth = useCallback((link) => {
     if (!highlight) return 0.16;
     const s = typeof link.source === "object" ? link.source.id : link.source;
     const t = typeof link.target === "object" ? link.target.id : link.target;
     return highlight.has(s) && highlight.has(t) ? 0.55 : 0.07;
   }, [highlight]);
-
   const linkVisibility = useCallback((link) => {
     if (activeComm == null) return true;
     const s = typeof link.source === "object" ? link.source : null;
@@ -177,7 +186,6 @@ export default function App() {
     if (!s || !t) return true;
     return s.community === activeComm || t.community === activeComm;
   }, [activeComm]);
-
   const nodeLabel = useCallback((node) => {
     const author = getFirstAuthor(node.authors ?? node.firstAuthor);
     return `${author} (${node.year || "n.d."})\n${node.title}`;
@@ -186,15 +194,18 @@ export default function App() {
   const handleDownload = useCallback(() => {
     Promise.all([
       fetch("./data/corpus.json").then((r) => (r.ok ? r.text() : "")),
-      fetch("./data/graph.json").then((r) => r.text()),
-    ]).then(([corpus, graph]) => {
-      const readme =
-        "Citation Star-Map corpus\nSource: OpenAlex\nEdges are in-corpus direct citations and co-citations only.\n";
-      downloadZip("connectomics-corpus.zip", [
-        { name: "corpus.json", text: corpus || graph },
-        { name: "graph.json", text: graph },
-        { name: "README.txt", text: readme + JSON.stringify(raw?.completeness || {}, null, 2) },
-      ]);
+      fetch("./data/graph-core.json").then((r) => (r.ok ? r.text() : "")),
+      fetch("./data/nodes-a.json").then((r) => (r.ok ? r.text() : "[]")),
+      fetch("./data/nodes-b.json").then((r) => (r.ok ? r.text() : "[]")),
+      fetch("./data/links.json").then((r) => (r.ok ? r.text() : "[]")),
+      fetch("./data/meta.json").then((r) => (r.ok ? r.text() : "{}")),
+      fetch("./data/abstracts-a.json").then((r) => (r.ok ? r.text() : "{}")),
+      fetch("./data/abstracts-b.json").then((r) => (r.ok ? r.text() : "{}")),
+    ]).then((texts) => {
+      const names = ["corpus.json","graph-core.json","nodes-a.json","nodes-b.json","links.json","meta.json","abstracts-a.json","abstracts-b.json"];
+      const files = [{ name: "README.txt", text: "Citation Star-Map corpus from OpenAlex.\nNo invented edges.\n\n" + JSON.stringify(raw?.completeness || {}, null, 2) + "\n" }];
+      texts.forEach((t, i) => { if (t && t !== "[]" && t !== "{}") files.push({ name: names[i], text: t }); });
+      downloadZip("connectomics-corpus.zip", files);
     });
   }, [raw]);
 
@@ -212,7 +223,6 @@ export default function App() {
       </div>
     );
   }
-
   if (!raw) {
     return (
       <div className="hero loading-hero">
@@ -255,9 +265,7 @@ export default function App() {
           {completeness.papersRetrieved} real papers from OpenAlex. Edges baked at
           build time from in-corpus citations and co-citation — never invented.
         </p>
-        <button type="button" className="btn" onClick={handleDownload}>
-          Download corpus
-        </button>
+        <button type="button" className="btn" onClick={handleDownload}>Download corpus</button>
       </header>
       <aside className="hud hud-bl completeness">
         <p className="eyebrow">Data completeness</p>
@@ -279,13 +287,7 @@ export default function App() {
             const on = activeComm == null || activeComm === c.id;
             return (
               <li key={c.id}>
-                <button
-                  type="button"
-                  className={on ? "comm on" : "comm dim"}
-                  onMouseEnter={() => setHoverComm(c.id)}
-                  onMouseLeave={() => setHoverComm(null)}
-                  onClick={() => setPinnedComm((cur) => (cur === c.id ? null : c.id))}
-                >
+                <button type="button" className={on ? "comm on" : "comm dim"} onMouseEnter={() => setHoverComm(c.id)} onMouseLeave={() => setHoverComm(null)} onClick={() => setPinnedComm((cur) => (cur === c.id ? null : c.id))}>
                   <i style={{ background: c.color }} />
                   <span>{c.label}</span>
                   <em>{c.size}</em>
@@ -299,18 +301,11 @@ export default function App() {
       {selected && (
         <article className="detail">
           <button type="button" className="close" onClick={onBackgroundClick} aria-label="Close">×</button>
-          <p className="eyebrow">
-            {getFirstAuthor(selected.authors ?? selected.firstAuthor)} · {selected.year || "n.d."}
-          </p>
+          <p className="eyebrow">{getFirstAuthor(selected.authors ?? selected.firstAuthor)} · {selected.year || "n.d."}</p>
           <h2>{selected.title}</h2>
-          <p className="meta">
-            {authorLine(selected.authors)} · cited {selected.cited_by_count}
-            {selected.doi ? ` · ${selected.doi}` : ""}
-          </p>
+          <p className="meta">{authorLine(selected.authors)} · cited {selected.cited_by_count}{selected.doi ? ` · ${selected.doi}` : ""}</p>
           <p className="abstract">{selected.abstract || "No abstract in the baked corpus."}</p>
-          {selectedHref ? (
-            <a className="btn" href={selectedHref} target="_blank" rel="noopener noreferrer">Open paper</a>
-          ) : null}
+          {selectedHref ? <a className="btn" href={selectedHref} target="_blank" rel="noopener noreferrer">Open paper</a> : null}
         </article>
       )}
     </div>
