@@ -1,0 +1,27 @@
+{
+  "title": "Citation Star-Map \u2014 Network Neuroscience",
+  "built_at": "2026-09-07T11:25:39Z",
+  "completeness": {
+    "n_papers": 200,
+    "n_with_abstract": 200,
+    "n_with_references": 200,
+    "n_direct_citation_edges_uncapped": 880,
+    "n_cocitation_edges_uncapped": 702,
+    "n_keyword_edges_uncapped": 0,
+    "n_edges_baked": 700,
+    "edge_cap": 700,
+    "keyword_fallback_used": false,
+    "min_cocitation_support": 2,
+    "edge_type_counts": { "citation": 700 },
+    "citation_coverage": 0.77,
+    "source": "OpenAlex Works API (referenced_works + concepts)",
+    "note": "Direct citation and co-citation edges are derived only from OpenAlex referenced_works restricted to the selected corpus. Keyword co-occurrence is used only when the citation+co-citation graph is sparse (<120 unique pairs)."
+  },
+  "communities": [
+    { "id": 0, "name": "Resting State fMRI", "size": 54 },
+    { "id": 1, "name": "Connectome", "size": 47 },
+    { "id": 2, "name": "Human Brain", "size": 34 },
+    { "id": 3, "name": "Diffusion MRI", "size": 65 }
+  ],
+  "layout": { "kind": "fibonacci-ellipsoid", "axes": [140.0, 90.0, 110.0], "min_node_spacing": 18.0 }
+}
