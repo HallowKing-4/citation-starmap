@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ForceGraph3D from "react-force-graph-3d";
 import * as THREE from "three";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { authorLine, getFirstAuthor, neighborSet, placeOnEllipsoid } from "./helpers";
+import { authorLine, getFirstAuthor, neighborSet, paperHref, placeOnEllipsoid } from "./helpers";
 import { addStarfield, makeStarSprite } from "./glow";
 import { downloadZip } from "./zip";
 
@@ -13,14 +13,19 @@ export default function App() {
   const fgRef = useRef(null);
   const wrapRef = useRef(null);
   const bloomRef = useRef(false);
+  const nodeObjectFn = useRef(null);
+  const wheelBound = useRef(false);
+
   const [raw, setRaw] = useState(null);
   const [loadError, setLoadError] = useState(null);
-  const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
+  const [dims, setDims] = useState(() => ({
+    w: typeof window === "undefined" ? 1280 : window.innerWidth,
+    h: typeof window === "undefined" ? 720 : window.innerHeight,
+  }));
   const [hoverComm, setHoverComm] = useState(null);
   const [pinnedComm, setPinnedComm] = useState(null);
   const [selected, setSelected] = useState(null);
   const [highlight, setHighlight] = useState(null);
-  const nodeObjectFn = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -31,17 +36,26 @@ export default function App() {
       })
       .then((data) => {
         if (!alive) return;
-        placeOnEllipsoid(data.nodes);
+        if (Array.isArray(data.nodes)) placeOnEllipsoid(data.nodes);
         setRaw(data);
       })
-      .catch((err) => { if (alive) setLoadError(err); });
-    return () => { alive = false; };
+      .catch((err) => {
+        if (alive) setLoadError(err);
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   useEffect(() => {
     const onResize = () => setDims({ w: window.innerWidth, h: window.innerHeight });
+    const lockWheel = (e) => { e.preventDefault(); };
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    document.addEventListener("wheel", lockWheel, { passive: false });
+    return () => {
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("wheel", lockWheel);
+    };
   }, []);
 
   const colorByComm = useMemo(() => {
@@ -59,7 +73,7 @@ export default function App() {
 
   const buildNodeObject = useCallback(
     (node) => {
-      const color = colorByComm.get(node.community) || "#8aa";
+      const color = colorByComm.get(node.community) || "#8aa4ff";
       const isSel = selected && node.id === selected.id;
       const inNeigh = highlight ? highlight.has(node.id) : true;
       const commDim = activeComm == null ? false : node.community !== activeComm;
@@ -77,8 +91,9 @@ export default function App() {
 
   useEffect(() => {
     const fg = fgRef.current;
-    if (!fg || !raw) return;
-    fg.refresh();
+    if (!fg || !raw) return undefined;
+    if (typeof fg.refresh === "function") fg.refresh();
+    return undefined;
   }, [activeComm, highlight, selected, raw, buildNodeObject]);
 
   const handleEngineStop = useCallback(() => {
@@ -86,9 +101,9 @@ export default function App() {
     if (!fg || bloomRef.current) return;
     try {
       const composer = fg.postProcessingComposer();
-      const bloom = new UnrealBloomPass(new THREE.Vector2(dims.w, dims.h), 1.35, 0.55, 0.18);
+      const bloom = new UnrealBloomPass(new THREE.Vector2(dims.w, dims.h), 1.25, 0.52, 0.22);
       composer.addPass(bloom);
-      addStarfield(fg.scene(), 1600);
+      addStarfield(fg.scene(), 1800);
       bloomRef.current = true;
     } catch (err) {
       console.warn("bloom/starfield skipped", err);
@@ -97,20 +112,26 @@ export default function App() {
 
   useEffect(() => {
     const fg = fgRef.current;
-    if (!fg || !raw) return;
+    if (!fg || !raw) return undefined;
     const controls = fg.controls();
     if (controls) {
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.35;
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
+      controls.enablePan = true;
+      controls.enableZoom = true;
     }
     fg.cameraPosition({ x: 0, y: 28, z: 430 }, { x: 0, y: 0, z: 0 }, 1800);
     const el = fg.renderer()?.domElement;
-    if (!el) return undefined;
+    if (!el || wheelBound.current) return undefined;
     const onWheel = (e) => { e.preventDefault(); };
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    wheelBound.current = true;
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      wheelBound.current = false;
+    };
   }, [raw]);
 
   const onNodeClick = useCallback((node) => {
@@ -118,7 +139,7 @@ export default function App() {
     setSelected(node);
     setHighlight(neighborSet(raw.links, node.id));
     const fg = fgRef.current;
-    if (fg) {
+    if (fg && Number.isFinite(node.x)) {
       const dist = 90;
       const cam = fg.camera();
       const view = cam.position.clone().sub(new THREE.Vector3(node.x, node.y, node.z)).setLength(dist);
@@ -143,10 +164,10 @@ export default function App() {
   }, [highlight]);
 
   const linkWidth = useCallback((link) => {
-    if (!highlight) return 0.18;
+    if (!highlight) return 0.16;
     const s = typeof link.source === "object" ? link.source.id : link.source;
     const t = typeof link.target === "object" ? link.target.id : link.target;
-    return highlight.has(s) && highlight.has(t) ? 0.55 : 0.08;
+    return highlight.has(s) && highlight.has(t) ? 0.55 : 0.07;
   }, [highlight]);
 
   const linkVisibility = useCallback((link) => {
@@ -161,6 +182,24 @@ export default function App() {
     const author = getFirstAuthor(node.authors ?? node.firstAuthor);
     return `${author} (${node.year || "n.d."})\n${node.title}`;
   }, []);
+
+  const handleDownload = useCallback(() => {
+    Promise.all([
+      fetch("./data/corpus.json").then((r) => (r.ok ? r.text() : "")),
+      fetch("./data/graph.json").then((r) => r.text()),
+    ]).then(([corpus, graph]) => {
+      const readme =
+        "Citation Star-Map corpus\nSource: OpenAlex\nEdges are in-corpus direct citations and co-citations only.\n";
+      downloadZip("connectomics-corpus.zip", [
+        { name: "corpus.json", text: corpus || graph },
+        { name: "graph.json", text: graph },
+        { name: "README.txt", text: readme + JSON.stringify(raw?.completeness || {}, null, 2) },
+      ]);
+    });
+  }, [raw]);
+
+  const completeness = raw?.completeness || {};
+  const selectedHref = paperHref(selected);
 
   if (loadError) {
     return (
@@ -183,8 +222,6 @@ export default function App() {
     );
   }
 
-  const completeness = raw.completeness || {};
-
   return (
     <div className="hero" ref={wrapRef}>
       <ForceGraph3D
@@ -204,44 +241,24 @@ export default function App() {
         cooldownTicks={0}
         warmupTicks={0}
         enableNodeDrag={false}
+        enableNavigationControls
         linkColor={linkColor}
         linkOpacity={1}
         linkWidth={linkWidth}
         linkVisibility={linkVisibility}
         linkDirectionalParticles={0}
       />
-
       <header className="hud hud-tl">
         <p className="eyebrow">Citation star-map</p>
         <h1>Network neuroscience / brain connectomics</h1>
         <p className="lede">
-          {completeness.papersRetrieved} real papers from Europe PMC. Edges baked at
+          {completeness.papersRetrieved} real papers from OpenAlex. Edges baked at
           build time from in-corpus citations and co-citation — never invented.
         </p>
-        <button
-          type="button"
-          className="btn"
-          onClick={() => {
-            const url = "./data/corpus.json";
-            fetch(url)
-              .then((r) => (r.ok ? r.text() : fetch("./data/graph.json").then((g) => g.text())))
-              .then((corpus) =>
-                downloadZip("connectomics-corpus.zip", [
-                  { name: "corpus.json", text: corpus },
-                  {
-                    name: "README.txt",
-                    text:
-                      "Citation Star-Map corpus from Europe PMC.\n" +
-                      "Edges are in-corpus direct citations and co-citations only.\n",
-                  },
-                ])
-              );
-          }}
-        >
+        <button type="button" className="btn" onClick={handleDownload}>
           Download corpus
         </button>
       </header>
-
       <aside className="hud hud-bl completeness">
         <p className="eyebrow">Data completeness</p>
         <ul>
@@ -255,7 +272,6 @@ export default function App() {
         </ul>
         <p className="tiny">{completeness.source}</p>
       </aside>
-
       <aside className="hud hud-br legend">
         <p className="eyebrow">Louvain communities</p>
         <ul>
@@ -280,7 +296,6 @@ export default function App() {
         </ul>
         <p className="tiny">Hover to isolate · click to pin</p>
       </aside>
-
       {selected && (
         <article className="detail">
           <button type="button" className="close" onClick={onBackgroundClick} aria-label="Close">×</button>
@@ -293,9 +308,9 @@ export default function App() {
             {selected.doi ? ` · ${selected.doi}` : ""}
           </p>
           <p className="abstract">{selected.abstract || "No abstract in the baked corpus."}</p>
-          {selected.url && (
-            <a className="btn" href={selected.url} target="_blank" rel="noopener noreferrer">Open paper</a>
-          )}
+          {selectedHref ? (
+            <a className="btn" href={selectedHref} target="_blank" rel="noopener noreferrer">Open paper</a>
+          ) : null}
         </article>
       )}
     </div>
