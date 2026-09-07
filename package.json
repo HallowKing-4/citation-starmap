@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "mkdir -p dist/src && cp index.html graph.json meta.json README.md dist/ && cp src/*.js src/*.css dist/src/",
+    "build": "mkdir -p dist/src && cp index.html meta.json README.md nodes-*.json links.json dist/ && cp src/*.js src/*.css dist/src/",
     "corpus": "python3 scripts/build_corpus.py"
   }
 }

@@ -11,25 +11,30 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      fetch('./graph.json').then((r) => {
-        if (!r.ok) throw new Error(`graph.json ${r.status}`);
-        return r.json();
-      }),
-      fetch('./meta.json').then((r) => {
-        if (!r.ok) throw new Error(`meta.json ${r.status}`);
-        return r.json();
-      }),
+      fetch('./nodes-0.json'),
+      fetch('./nodes-1.json'),
+      fetch('./nodes-2.json'),
+      fetch('./nodes-3.json'),
+      fetch('./links.json'),
+      fetch('./meta.json'),
     ])
-      .then(([g, m]) => {
+      .then(async (resps) => {
+        for (const r of resps) {
+          if (!r.ok) throw new Error(`${r.url} ${r.status}`);
+        }
+        const [n0, n1, n2, n3, links, m] = await Promise.all(resps.map((r) => r.json()));
+        return [[...n0, ...n1, ...n2, ...n3], links, m];
+      })
+      .then(([rawNodes, links, m]) => {
         if (cancelled) return;
-        const nodes = (g.nodes || []).map((n) => ({
+        const nodes = (rawNodes || []).map((n) => ({
           ...n,
           first_author: getFirstAuthor(n.authors) || n.first_author || 'Unknown',
           fx: n.x,
           fy: n.y,
           fz: n.z,
         }));
-        setGraph({ nodes, links: g.links || [] });
+        setGraph({ nodes, links: links || [] });
         setMeta(m);
         setReady(true);
       })

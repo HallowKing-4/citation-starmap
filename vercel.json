@@ -1,5 +1,5 @@
 {
-  "buildCommand": "mkdir -p dist/src && cp index.html graph.json meta.json README.md dist/ && cp src/*.js src/*.css dist/src/",
+  "buildCommand": "mkdir -p dist/src && cp index.html meta.json README.md nodes-*.json links.json dist/ && cp src/*.js src/*.css dist/src/",
   "outputDirectory": "dist",
   "framework": null
 }
