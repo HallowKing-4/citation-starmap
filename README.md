@@ -1,10 +1,7 @@
-# Citation Star-Map
+# Citation Star-Map — Network Neuroscience
 
-Fully static, no-backend 3D citation star-map of **200 real papers** in network neuroscience / brain connectomics.
+Fully static, no-backend 3D citation map of 200 real papers.
 
-Corpus from OpenAlex. Edges baked from `referenced_works` only (direct citation, co-citation, bibliographic coupling). Keyword co-occurrence is a documented fallback and was not used in this build.
+Edges are computed only from OpenAlex `referenced_works` (direct citation + co-citation). Keyword co-occurrence is a documented fallback and was not required for this build.
 
-```bash
-npm install
-npm run dev
-```
+Open `index.html` via any static host. Download corpus from the HUD button.

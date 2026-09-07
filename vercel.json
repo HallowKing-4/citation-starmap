@@ -1,9 +1,5 @@
 {
-  "framework": "vite",
-  "headers": [
-    {
-      "source": "/graph.json",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
-    }
-  ]
+  "buildCommand": "mkdir -p dist/src && cp index.html graph.json meta.json README.md dist/ && cp src/*.js src/*.css dist/src/",
+  "outputDirectory": "dist",
+  "framework": null
 }
