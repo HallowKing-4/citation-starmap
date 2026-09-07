@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -11,7 +11,7 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('Star-map crashed', error, info);
+    console.error("Star-map crashed", error, info);
   }
 
   render() {
@@ -21,7 +21,9 @@ export default class ErrorBoundary extends React.Component {
           <div className="crash-card">
             <p className="crash-kicker">error boundary</p>
             <h1>The star-map failed to render</h1>
-            <p className="crash-msg">{String(this.state.error?.message || this.state.error)}</p>
+            <p className="crash-msg">
+              {String(this.state.error?.message || this.state.error)}
+            </p>
             <button type="button" onClick={() => window.location.reload()}>
               Reload
             </button>
