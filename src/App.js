@@ -1,80 +1,53 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import StarMap from './StarMap.js';
-import { getFirstAuthor } from './helpers.js';
+import { useEffect, useMemo, useState } from "react";
+import StarMap from "./StarMap.js";
+import { el } from "./htm.js";
 
 export default function App() {
   const [graph, setGraph] = useState(null);
-  const [meta, setMeta] = useState(null);
-  const [error, setError] = useState(null);
-  const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      fetch('./nodes-0.json'),
-      fetch('./nodes-1.json'),
-      fetch('./nodes-2.json'),
-      fetch('./nodes-3.json'),
-      fetch('./links.json'),
-      fetch('./meta.json'),
-    ])
-      .then(async (resps) => {
-        for (const r of resps) {
-          if (!r.ok) throw new Error(`${r.url} ${r.status}`);
-        }
-        const [n0, n1, n2, n3, links, m] = await Promise.all(resps.map((r) => r.json()));
-        return [[...n0, ...n1, ...n2, ...n3], links, m];
+    fetch("./graph.json")
+      .then((r) => {
+        if (!r.ok) throw new Error(`graph.json ${r.status}`);
+        return r.json();
       })
-      .then(([rawNodes, links, m]) => {
-        if (cancelled) return;
-        const nodes = (rawNodes || []).map((n) => ({
-          ...n,
-          first_author: getFirstAuthor(n.authors) || n.first_author || 'Unknown',
-          fx: n.x,
-          fy: n.y,
-          fz: n.z,
-        }));
-        setGraph({ nodes, links: links || [] });
-        setMeta(m);
-        setReady(true);
+      .then((data) => {
+        if (!cancelled) setGraph(data);
       })
-      .catch((e) => {
-        if (!cancelled) setError(e);
+      .catch((err) => {
+        if (!cancelled) setLoadError(err);
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const completeness = useMemo(() => (meta && meta.completeness) || null, [meta]);
+  const ready = useMemo(() => Boolean(graph?.nodes?.length), [graph]);
 
-  if (error) {
-    return React.createElement(
-      'div',
-      { className: 'fatal' },
-      React.createElement(
-        'div',
-        null,
-        React.createElement('p', { className: 'kicker' }, 'Corpus missing'),
-        React.createElement('h1', null, 'Could not load the baked graph'),
-        React.createElement('p', { className: 'muted' }, String(error.message || error))
+  if (loadError) {
+    return el(
+      "div",
+      { className: "fatal" },
+      el(
+        "div",
+        { className: "fatal-card" },
+        el("p", { className: "kicker" }, "Corpus missing"),
+        el("h1", null, "Could not load the baked star catalog."),
+        el("p", { className: "fatal-msg" }, String(loadError.message || loadError))
       )
     );
   }
 
-  if (!ready || !graph) {
-    return React.createElement(
-      'div',
-      { className: 'boot' },
-      React.createElement(
-        'div',
-        null,
-        React.createElement('p', { className: 'kicker' }, 'Network neuroscience'),
-        React.createElement('h1', null, 'Lighting the star-map'),
-        React.createElement('p', { className: 'muted' }, 'Loading baked OpenAlex corpus…')
-      )
+  if (!ready) {
+    return el(
+      "div",
+      { className: "boot" },
+      el("div", { className: "boot-mark" }),
+      el("p", null, "Aligning the connectome…")
     );
   }
 
-  return React.createElement(StarMap, { graph, meta, completeness });
+  return el(StarMap, { graph });
 }
