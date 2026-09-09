@@ -1,8 +1,9 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.js';
-import ErrorBoundary from './ErrorBoundary.js';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import ErrorBoundary from "./ErrorBoundary.js";
+import App from "./App.js";
+import { el } from "./htm.js";
 
-createRoot(document.getElementById('root')).render(
-  React.createElement(ErrorBoundary, null, React.createElement(App))
+createRoot(document.getElementById("root")).render(
+  el(React.StrictMode, null, el(ErrorBoundary, null, el(App)))
 );
