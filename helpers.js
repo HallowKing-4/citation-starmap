@@ -1,0 +1,39 @@
+/** Accept authors as string | string[] | object[]. Never throw. */
+export function getFirstAuthor(authors) {
+  if (authors == null || authors === "") return "Unknown";
+  if (typeof authors === "string") {
+    const trimmed = authors.trim();
+    return trimmed || "Unknown";
+  }
+  if (Array.isArray(authors)) {
+    if (authors.length === 0) return "Unknown";
+    return getFirstAuthor(authors[0]);
+  }
+  if (typeof authors === "object") {
+    const name =
+      authors.name ||
+      [authors.given, authors.family].filter(Boolean).join(" ") ||
+      authors.family ||
+      authors.first ||
+      "";
+    return String(name).trim() || "Unknown";
+  }
+  return "Unknown";
+}
+
+export function formatAuthors(authors, limit = 4) {
+  if (authors == null || authors === "") return "Unknown authors";
+  const list = Array.isArray(authors)
+    ? authors.map((a) => getFirstAuthor(a))
+    : [getFirstAuthor(authors)];
+  const clean = list.filter(Boolean);
+  if (clean.length <= limit) return clean.join(", ");
+  return `${clean.slice(0, limit).join(", ")} +${clean.length - limit}`;
+}
+
+export function paperHref(node) {
+  if (!node) return "#";
+  if (node.url) return node.url;
+  if (node.doi) return `https://doi.org/${node.doi}`;
+  return "#";
+}
