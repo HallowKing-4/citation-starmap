@@ -1,32 +1,25 @@
-import React from "react";
+import React from 'react';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { error: null };
+    this.state = { err: null };
   }
-
-  static getDerivedStateFromError(error) {
-    return { error };
+  static getDerivedStateFromError(err) {
+    return { err };
   }
-
-  componentDidCatch(error, info) {
-    console.error("Star-map crashed", error, info);
+  componentDidCatch(err, info) {
+    console.error('Citation star-map crashed', err, info);
   }
-
   render() {
-    if (this.state.error) {
+    if (this.state.err) {
       return (
-        <div className="crash">
-          <div className="crash-card">
-            <p className="crash-kicker">error boundary</p>
-            <h1>The star-map failed to render</h1>
-            <p className="crash-msg">
-              {String(this.state.error?.message || this.state.error)}
-            </p>
-            <button type="button" onClick={() => window.location.reload()}>
-              Reload
-            </button>
+        <div className="fatal">
+          <div>
+            <h1>Star-map failed to render</h1>
+            <p>{String(this.state.err?.message || this.state.err)}</p>
+            <p className="muted">The corpus JSON is still downloadable if the 3D canvas cannot start.</p>
+            <a className="btn" href="./corpus.zip" download>Download corpus</a>
           </div>
         </div>
       );

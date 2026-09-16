@@ -4,10 +4,5 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   base: './',
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-    assetsInlineLimit: 4096,
-    chunkSizeWarningLimit: 1800,
-  },
+  build: { outDir: 'dist', assetsDir: 'assets', sourcemap: false },
 });

@@ -1,10 +1,11 @@
 # Citation Star-Map
 
-Fully static 3D citation atlas of real network-neuroscience / brain-connectomics papers.
+Fully static 3D citation map of ~200 real PubMed papers in network neuroscience / brain connectomics.
 
-- `data/graph.json` — baked nodes, Louvain communities, ellipsoid coordinates, edges
-- `corpus.zip` — downloadable corpus
+Edges are computed at build time from NCBI `pubmed_pubmed_refs` (direct citation, co-citation, bibliographic coupling). No invented edges.
 
-Edges come from Crossref reference lists only (direct citation + co-citation). No citations are invented. Keyword co-occurrence is a fallback only if the citation graph is sparse.
-
-Open `index.html` on any static host (`*.kimi.page`, GitHub Pages, Vercel).
+```
+python3 scripts/build_corpus.py
+npm install
+npm run build
+```
