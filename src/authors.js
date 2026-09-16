@@ -1,38 +1,39 @@
-/** Authors may arrive as a string, a string[], or a nested object. */
+/** Authors arrive as string | string[] from mixed bibliographic sources. */
 export function getFirstAuthor(authors) {
-  if (authors == null || authors === "") return "Unknown";
-  if (typeof authors === "string") {
-    const piece = authors.split(/[,;&]| and /i)[0].trim();
-    return piece || "Unknown";
-  }
+  if (authors == null || authors === '') return 'Unknown';
   if (Array.isArray(authors)) {
-    if (authors.length === 0) return "Unknown";
-    return getFirstAuthor(authors[0]);
+    for (const item of authors) {
+      const name = getFirstAuthor(item);
+      if (name && name !== 'Unknown') return name;
+    }
+    return 'Unknown';
   }
-  if (typeof authors === "object") {
+  if (typeof authors === 'string') {
+    const chunk = authors
+      .split(/\s+and\s+|;&|\s*;\s*|\s*,\s*(?=[A-Z])/)[0]
+      .replace(/\.$/, '')
+      .trim();
+    return chunk || 'Unknown';
+  }
+  if (typeof authors === 'object') {
     return (
       authors.display_name ||
+      authors.fullName ||
       authors.name ||
-      authors.author ||
-      authors.first ||
-      getFirstAuthor(authors.authors) ||
-      "Unknown"
+      getFirstAuthor(authors.author) ||
+      'Unknown'
     );
   }
-  return "Unknown";
+  return 'Unknown';
 }
 
-export function authorLine(authors, limit = 4) {
-  if (authors == null || authors === "") return "Unknown authors";
+export function formatAuthors(authors) {
+  if (authors == null || authors === '') return 'Unknown';
   const list = Array.isArray(authors)
-    ? authors.map((a) => (typeof a === "string" ? a : getFirstAuthor(a))).filter(Boolean)
-    : typeof authors === "string"
-      ? authors
-          .split(/;| and /i)
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [getFirstAuthor(authors)];
-  if (!list.length) return "Unknown authors";
-  if (list.length <= limit) return list.join(", ");
-  return `${list.slice(0, limit).join(", ")} +${list.length - limit}`;
+    ? authors.map((a) => getFirstAuthor(a)).filter((n) => n && n !== 'Unknown')
+    : [getFirstAuthor(authors)];
+  if (!list.length) return 'Unknown';
+  if (list.length === 1) return list[0];
+  if (list.length === 2) return `${list[0]} & ${list[1]}`;
+  return `${list[0]} et al.`;
 }

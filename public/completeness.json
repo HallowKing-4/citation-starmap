@@ -1,0 +1,25 @@
+{
+  "papers": 200,
+  "papers_with_referenced_works": 156,
+  "papers_citing_another_corpus_member": 103,
+  "direct_citation_pairs": 246,
+  "unique_bibliographic_pairs": 3832,
+  "keyword_fallback_pairs_available": 8831,
+  "mean_referenced_works": 59.43,
+  "density_bibliographic": 0.192563,
+  "source": "NCBI E-utilities (PubMed esearch + efetch + elink pubmed_pubmed_refs)",
+  "invented_edges": 0,
+  "fallback_used": false,
+  "notes": [
+    "Bibliographic edges were dense enough; keyword co-occurrence kept in reserve."
+  ],
+  "connected_components_bibliographic": 43,
+  "largest_component_bibliographic": 158,
+  "edges_emitted": 700,
+  "edges_by_kind": {
+    "direct_citation": 246,
+    "co_citation": 78,
+    "biblio_coupling": 376
+  },
+  "cap": 700
+}
