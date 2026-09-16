@@ -4,10 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Citation Star-Map — Network Neuroscience</title>
-    <meta name="description" content="A fully static 3D citation star-map of ~200 real papers in network neuroscience and brain connectomics." />
+    <meta
+      name="description"
+      content="A static 3D citation star-map of real network neuroscience and brain connectomics papers. Direct citation and co-citation edges computed at build time."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.3.1",
+          "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+          "react-dom": "https://esm.sh/react-dom@18.3.1",
+          "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+          "htm": "https://esm.sh/htm@3.1.1",
+          "three": "https://esm.sh/three@0.169.0",
+          "three/addons/": "https://esm.sh/three@0.169.0/examples/jsm/",
+          "react-force-graph-3d": "https://esm.sh/react-force-graph-3d@1.24.3?external=react,three",
+          "three-forcegraph": "https://esm.sh/three-forcegraph@1.41.12?external=three",
+          "3d-force-graph": "https://esm.sh/3d-force-graph@1.73.3?external=three"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="./app.js"></script>
   </body>
 </html>

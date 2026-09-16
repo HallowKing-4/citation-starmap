@@ -1,11 +1,10 @@
 # Citation Star-Map
 
-Fully static 3D citation map of ~200 real PubMed papers in network neuroscience / brain connectomics.
+Static, no-backend 3D citation atlas of real network-neuroscience / connectomics papers.
 
-Edges are computed at build time from NCBI `pubmed_pubmed_refs` (direct citation, co-citation, bibliographic coupling). No invented edges.
+- Corpus retrieved from Europe PMC, OpenAlex, and Crossref
+- Edges computed at build time: intra-corpus direct citation + co-citation
+- Keyword co-occurrence used only for papers with no intra-corpus citation link
+- Completeness stats are baked into graph.json
 
-```
-python3 scripts/build_corpus.py
-npm install
-npm run build
-```
+Open index.html on any static host. The page is one full-viewport 3D hero.
