@@ -1,0 +1,30 @@
+{
+  "papers": 194,
+  "edgesKept": 700,
+  "edgesBeforeCap": 4281,
+  "edgeCap": 700,
+  "abstractCoverage": 0.7268,
+  "doiCoverage": 1.0,
+  "referenceListCoverage": 1.0,
+  "directCitationEdges": 606,
+  "coCitationEdges": 386,
+  "bibliographicCouplingEdges": 659,
+  "keywordFallbackEdges": 42,
+  "papersWithIntraCorpusCitationLink": 164,
+  "isolatesAfterFallback": 0,
+  "communities": 10,
+  "sources": {
+    "openalex": true,
+    "queries": [
+      "brain connectomics",
+      "human connectome project network",
+      "network neuroscience graph theory brain",
+      "structural functional connectivity MRI brain",
+      "rich club cortical hubs connectome",
+      "dynamic functional connectivity networks fMRI",
+      "connectome modularity community detection cortex"
+    ],
+    "note": "Edges are computed only from OpenAlex referenced_works inside this corpus (direct citation, co-citation, bibliographic coupling). Keyword co-occurrence is used only as fallback when citation structure is sparse or a paper is isolated."
+  },
+  "builtAt": "2026-09-18T11:45:28Z"
+}
